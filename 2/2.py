@@ -95,3 +95,5 @@ if __name__ == "__main__":
     if is_chain_valid(blockchain, difficulty): # проверка целостности цепочки
         print('Целостность цепочечки:', is_chain_valid(blockchain, difficulty))
     report()
+
+    
