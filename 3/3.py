@@ -182,7 +182,7 @@ class Blockchain: # отдельный класс блокчейна чтобы 
             print(f"{acc}: {balance}")
 
     def print_logs(self): # вывод лога выполнения, чтобы видно было где всё получилось а где всё умерло
-        print("\nЛОГ ИСПОЛНЕНИЯ ТРАНЗАКЦИЙ:")
+        print("\nЛ0Г ИСПОЛНЕНИЯ ТРАНЗАКЦИЙ:")
         print("=" * 60)
         for log in self.logs:
             print(log)
