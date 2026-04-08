@@ -61,7 +61,7 @@ class Block: # класс блок самый главный
                 json.dumps(tx.to_dict(), sort_keys=True, ensure_ascii=False).encode() # превращаем транзакцию в строку и хешируем ее, так получаем лист дерева Мёркла, который зависит от всех транзакций в блоке
             ).hexdigest()
             for tx in self.transactions
-        ] or [hashlib.sha256(b"EMPTY").hexdigest()]
+        ] or [hashlib.sha256(b"HUI").hexdigest()]
 
         while len(hashes) > 1: # пока не останется один хеш, который и будет корнем дерева
             if len(hashes) % 2:
