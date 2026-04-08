@@ -55,6 +55,24 @@ class Block: # класс блок самый главный
             else:
                 self.nonce += 1
 
+    def drevo_merkle(self): # функция для расчёта корня дерева Мёркла, который позволяет быстро проверять наличие транзакции в блоке без необходимости перебирать все транзакции
+        hashes = [
+            hashlib.sha256(
+                json.dumps(tx.to_dict(), sort_keys=True, ensure_ascii=False).encode() # превращаем транзакцию в строку и хешируем ее, так получаем лист дерева Мёркла, который зависит от всех транзакций в блоке
+            ).hexdigest()
+            for tx in self.transactions
+        ] or [hashlib.sha256(b"EMPTY").hexdigest()]
+
+        while len(hashes) > 1: # пока не останется один хеш, который и будет корнем дерева
+            if len(hashes) % 2:
+                hashes.append(hashes[-1])
+
+            hashes = [
+                hashlib.sha256((hashes[i] + hashes[i + 1]).encode()).hexdigest()
+                for i in range(0, len(hashes), 2)
+            ]
+
+        return hashes[0] # единственный оставшийся хеш и есть корень дерева Мёркла, он зависит от всех транзакций в блоке и позволяет быстро проверять их целостность
 
 class Blockchain: # отдельный класс блокчейна чтобы хранить и цепочку и состояние и логи
     def __init__(self, difficulty):
@@ -67,6 +85,12 @@ class Blockchain: # отдельный класс блокчейна чтобы 
         genesis = Block(0, time.time(), [], "0")
         genesis.mine(difficulty) # майним нулевой блок, чтобы он тоже был валидным
         self.chain.append(genesis)
+
+    def proverka_merkla(self): # функция для проверки дерева Мёркла, просто выводим корни для каждого блока, если кто-то изменит транзакцию в блоке, корень изменится и мы это увидим
+        for i, block in enumerate(self.chain):
+            merkle_root = block.drevo_merkle()
+            print(f"Блок {i} Merkle root: {merkle_root}") # выводим корни дерева Мёркла для каждого блока, если кто-то изменит транзакцию в блоке, корень изменится и мы это увидим
+        return True
 
     def set_initial_state(self, balances): # задаём стартовые балансы аккаунтов
         self.state = copy.deepcopy(balances) # deepcopy чтобы не работать по ссылке и потом не удивляться почему всё поехало
@@ -167,6 +191,7 @@ class Blockchain: # отдельный класс блокчейна чтобы 
             print('previous_hash:', block.previous_hash)
             print('nonce:', block.nonce)
             print('hash:', block.hash)
+            print('merkle_root:', block.drevo_merkle())
             print('transactions:')
 
             if len(block.transactions) == 0:
@@ -236,6 +261,7 @@ def demo(): # основная демонстрация лабораторки
     blockchain.print_state()
 
     print("\nЦелостность цепочечки:", blockchain.is_chain_valid())
+    print("Проверка дерева Мёркла:", blockchain.proverka_merkla())
     blockchain.print_logs()
     blockchain.print_chain()
 
